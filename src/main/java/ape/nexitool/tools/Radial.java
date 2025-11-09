@@ -1,4 +1,4 @@
-package ape.radial;
+package ape.nexitool.tools;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -368,7 +368,9 @@ public class Radial {
     func.append("];\n}\n");
     System.out.println(func.toString());
     test.setRGB((int) cx, (int) cy, Color.RED.getRGB());
-    ImageIO.write(test, "png", new File(output));
+    if (output != null) {
+      ImageIO.write(test, "png", new File(output));
+    }
 
   }
 }
