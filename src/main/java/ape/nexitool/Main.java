@@ -63,6 +63,16 @@ public class Main {
       Resize.process(input, output, Double.parseDouble(args[3]));
       return;
     }
+    if (args[0].equals("rotate-y-180")) {
+      if (args.length != 3) {
+        help();
+        return;
+      }
+      String input = args[1];
+      String output = args[2];
+      RotateY180.process(input, output);
+      return;
+    }
     if (args[0].equals("set-height")) {
       if (args.length != 4) {
         help();
