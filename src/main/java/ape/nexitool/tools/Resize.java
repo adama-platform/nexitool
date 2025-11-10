@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class Resize {
   private static int getComponentCount(String attr) {
@@ -24,17 +26,17 @@ public class Resize {
     }
   }
 
-  private static void scaleVector(JsonNode vec, double scale, ObjectMapper mapper) {
+  private static void scaleVector(JsonNode vec, double scale) {
     if (vec instanceof ArrayNode v) {
       for (int i = 0; i < v.size(); i++) {
         double c = v.get(i).doubleValue() * scale;
-        v.set(i, mapper.valueToTree(c));
+        v.set(i, c);
       }
     }
   }
 
-  private static void scaleNode(JsonNode node, double scale, ObjectMapper mapper) {
-    scaleVector(node.get("translation"), scale, mapper);
+  private static void scaleNode(JsonNode node, double scale) {
+    scaleVector(node.get("translation"), scale);
     JsonNode parts = node.get("parts");
     if (parts instanceof ArrayNode pArray) {
       for (int j = 0; j < pArray.size(); j++) {
@@ -43,7 +45,7 @@ public class Resize {
         if (bones instanceof ArrayNode bArray) {
           for (int k = 0; k < bArray.size(); k++) {
             JsonNode bone = bArray.get(k);
-            scaleVector(bone.get("translation"), scale, mapper);
+            scaleVector(bone.get("translation"), scale);
           }
         }
       }
@@ -51,20 +53,20 @@ public class Resize {
     JsonNode children = node.get("children");
     if (children instanceof ArrayNode cArray) {
       for (int i = 0; i < cArray.size(); i++) {
-        scaleNode(cArray.get(i), scale, mapper);
+        scaleNode(cArray.get(i), scale);
       }
     }
   }
 
-  private static void scaleNodes(JsonNode nodes, double scale, ObjectMapper mapper) {
+  private static void scaleNodes(JsonNode nodes, double scale) {
     if (nodes instanceof ArrayNode array) {
       for (int i = 0; i < array.size(); i++) {
-        scaleNode(array.get(i), scale, mapper);
+        scaleNode(array.get(i), scale);
       }
     }
   }
 
-  private static void scaleMeshes(JsonNode root, double scale, ObjectMapper mapper) {
+  private static void scaleMeshes(JsonNode root, double scale) {
     JsonNode meshesNode = root.get("meshes");
     if (meshesNode instanceof ArrayNode meshes) {
       for (int m = 0; m < meshes.size(); m++) {
@@ -102,7 +104,7 @@ public class Resize {
     }
   }
 
-  private static void scaleAnimations(JsonNode root, double scale, ObjectMapper mapper) {
+  private static void scaleAnimations(JsonNode root, double scale) {
     JsonNode animsNode = root.get("animations");
     if (animsNode instanceof ArrayNode anims) {
       for (int a = 0; a < anims.size(); a++) {
@@ -115,7 +117,7 @@ public class Resize {
             if (kfs instanceof ArrayNode kfArray) {
               for (int k = 0; k < kfArray.size(); k++) {
                 JsonNode kf = kfArray.get(k);
-                scaleVector(kf.get("translation"), scale, mapper);
+                scaleVector(kf.get("translation"), scale);
               }
             }
           }
@@ -124,14 +126,18 @@ public class Resize {
     }
   }
 
+  public static void processPostLoad(JsonNode root, String outputPath, double scale) throws IOException {
+    scaleMeshes(root, scale);
+    scaleNodes(root.get("nodes"), scale);
+    scaleAnimations(root, scale);
+    Files.writeString(Paths.get(outputPath), root.toPrettyString());
+    System.out.println("Done");
+  }
+
   public static void process(String inputPath, String outputPath, double scale) throws IOException {
     ObjectMapper mapper = new ObjectMapper();
     JsonNode root = mapper.readTree(new File(inputPath));
-    scaleMeshes(root, scale, mapper);
-    scaleNodes(root.get("nodes"), scale, mapper);
-    scaleAnimations(root, scale, mapper);
-    mapper.writerWithDefaultPrettyPrinter().writeValue(new File(outputPath), root);
-    System.out.println("Done");
+    processPostLoad(root, outputPath, scale);
   }
 }
 
