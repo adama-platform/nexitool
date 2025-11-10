@@ -26,7 +26,7 @@ public class RotateY180 {
     }
   }
 
-  private static void flipTranslation(JsonNode vec) {
+  private static void flip(JsonNode vec) {
     if (vec instanceof ArrayNode v) {
       if (vec.size() >= 3) {
         v.set(0, v.get(0).asDouble() * -1);
@@ -35,24 +35,9 @@ public class RotateY180 {
     }
   }
 
-  private static void flipRotation(JsonNode vec) {
-    if (vec instanceof ArrayNode v) {
-      if (v.size() == 4) {
-        double x = v.get(0).doubleValue();
-        double y = v.get(1).doubleValue();
-        double z = v.get(2).doubleValue();
-        double w = v.get(3).doubleValue();
-        v.set(0, -z);
-        v.set(1, w);
-        v.set(2, -y);
-        v.set(3, x);
-      }
-    }
-  }
-
-  private static void scaleNode(JsonNode node) {
-    flipTranslation(node.get("translation"));
-    flipRotation(node.get("rotation"));
+  private static void flipNode(JsonNode node) {
+    flip(node.get("translation"));
+    flip(node.get("rotation"));
     JsonNode parts = node.get("parts");
     if (parts instanceof ArrayNode pArray) {
       for (int j = 0; j < pArray.size(); j++) {
@@ -61,8 +46,8 @@ public class RotateY180 {
         if (bones instanceof ArrayNode bArray) {
           for (int k = 0; k < bArray.size(); k++) {
             JsonNode bone = bArray.get(k);
-            flipTranslation(bone.get("translation"));
-            flipRotation(bone.get("rotation"));
+            flip(bone.get("translation"));
+            flip(bone.get("rotation"));
           }
         }
       }
@@ -70,20 +55,20 @@ public class RotateY180 {
     JsonNode children = node.get("children");
     if (children instanceof ArrayNode cArray) {
       for (int i = 0; i < cArray.size(); i++) {
-        scaleNode(cArray.get(i));
+        flipNode(cArray.get(i));
       }
     }
   }
 
-  private static void scaleNodes(JsonNode nodes) {
+  private static void flipNodes(JsonNode nodes) {
     if (nodes instanceof ArrayNode array) {
       for (int i = 0; i < array.size(); i++) {
-        scaleNode(array.get(i));
+        flipNode(array.get(i));
       }
     }
   }
 
-  private static void scaleMeshes(JsonNode root) {
+  private static void flipMeshes(JsonNode root) {
     JsonNode meshesNode = root.get("meshes");
     if (meshesNode instanceof ArrayNode meshes) {
       for (int m = 0; m < meshes.size(); m++) {
@@ -94,6 +79,8 @@ public class RotateY180 {
           int stride = 0;
           int posOffset = -1;
           int normalOffset = -1;
+          int tangentOffset = -1;
+          int binormalOffset = -1;
           int offset = 0;
           for (int i = 0; i < attrs.size(); i++) {
             String attr = attrs.get(i).asText();
@@ -103,6 +90,12 @@ public class RotateY180 {
             }
             if ("NORMAL".equals(attr)) {
               normalOffset = offset;
+            }
+            if ("TANGENT".equals(attr)) {
+              tangentOffset = offset;
+            }
+            if ("BINORMAL".equals(attr)) {
+              binormalOffset = offset;
             }
             offset += count;
             stride += count;
@@ -121,13 +114,25 @@ public class RotateY180 {
               verts.set(i + normalOffset, -x);
               verts.set(i + normalOffset + 2, -z);
             }
+            if (tangentOffset >= 0) {
+              double x = verts.get(i + tangentOffset).doubleValue();
+              double z = verts.get(i + tangentOffset + 2).doubleValue();
+              verts.set(i + tangentOffset, -x);
+              verts.set(i + tangentOffset + 2, -z);
+            }
+            if (binormalOffset >= 0) {
+              double x = verts.get(i + binormalOffset).doubleValue();
+              double z = verts.get(i + binormalOffset + 2).doubleValue();
+              verts.set(i + binormalOffset, -x);
+              verts.set(i + binormalOffset + 2, -z);
+            }
           }
         }
       }
     }
   }
 
-  private static void scaleAnimations(JsonNode root) {
+  private static void flipAnimations(JsonNode root) {
     JsonNode animsNode = root.get("animations");
     if (animsNode instanceof ArrayNode anims) {
       for (int a = 0; a < anims.size(); a++) {
@@ -140,8 +145,8 @@ public class RotateY180 {
             if (kfs instanceof ArrayNode kfArray) {
               for (int k = 0; k < kfArray.size(); k++) {
                 JsonNode kf = kfArray.get(k);
-                flipTranslation(kf.get("translation"));
-                //flipRotation(kf.get("rotation"));
+                flip(kf.get("translation"));
+                flip(kf.get("rotation"));
               }
             }
           }
@@ -151,11 +156,11 @@ public class RotateY180 {
   }
 
   public static void processPostLoad(JsonNode root, String outputPath) throws IOException {
-    scaleMeshes(root);
-    scaleNodes(root.get("nodes"));
-    scaleAnimations(root);
+    flipMeshes(root);
+    flipNodes(root.get("nodes"));
+    flipAnimations(root);
     Files.writeString(Paths.get(outputPath), root.toPrettyString());
-    System.out.println("Done");
+    System.out.println("Rotated 180");
   }
 
   public static void process(String inputPath, String outputPath) throws IOException {

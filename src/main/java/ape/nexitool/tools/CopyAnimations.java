@@ -25,6 +25,6 @@ public class CopyAnimations {
       }
     }
     Files.writeString(Paths.get(outputPath), rootModel.toPrettyString());
-    System.out.println("Done");
+    System.out.println("Copied Animations Over");
   }
 }

@@ -78,7 +78,6 @@ public class Resize {
           int posOffset = -1;
           int offset = 0;
           for (int i = 0; i < attrs.size(); i++) {
-            System.out.println(attrs.get(i).asText());
             String attr = attrs.get(i).asText();
             int count = getComponentCount(attr);
             if ("POSITION".equals(attr)) {
@@ -87,8 +86,6 @@ public class Resize {
             offset += count;
             stride += count;
           }
-          System.out.println("stride: " + stride);
-          System.out.println("total:" + verts.size() + "//" + (verts.size() / stride));
           if (posOffset >= 0) {
             for (int i = 0; i < verts.size(); i += stride) {
               double x = verts.get(i + posOffset).doubleValue() * scale;
@@ -131,7 +128,7 @@ public class Resize {
     scaleNodes(root.get("nodes"), scale);
     scaleAnimations(root, scale);
     Files.writeString(Paths.get(outputPath), root.toPrettyString());
-    System.out.println("Done");
+    System.out.println("Resized by Scale:" + scale);
   }
 
   public static void process(String inputPath, String outputPath, double scale) throws IOException {

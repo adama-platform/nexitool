@@ -1,9 +1,11 @@
 package ape.nexitool.tools;
 
+import ape.nexitool.tools.json.IsStaticMesh;
 import ape.nexitool.tools.json.VertexAttributes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -12,14 +14,13 @@ public class Sizer {
   public static void process(String file) throws Exception {
     String json = Files.readString(Paths.get(file));
     ObjectMapper mapper = new ObjectMapper();
-    JsonNode node = mapper.readTree(json);
-    Dimensions dims = new Dimensions(node);
-    System.out.println("min_x: " + dims.min_x);
-    System.out.println("min_y: " + dims.min_y);
-    System.out.println("min_z: " + dims.min_z);
-    System.out.println("max_x: " + dims.max_x);
-    System.out.println("max_y: " + dims.max_y);
-    System.out.println("max_z: " + dims.max_z);
+    ObjectNode root = (ObjectNode) mapper.readTree(json);
+    IsStaticMesh.warnIfNotStaticMesh(root);
+    Dimensions dims = new Dimensions(root);
+    System.out.println("Static Dimensions:");
+    System.out.println(" X: " + dims.min_x + " ->" + dims.max_x);
+    System.out.println(" Y: " + dims.min_y + " ->" + dims.max_y);
+    System.out.println(" Z: " + dims.min_z + " ->" + dims.max_z);
   }
 
   public static class Dimensions {

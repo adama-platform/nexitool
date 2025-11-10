@@ -1,6 +1,7 @@
 package ape.nexitool;
 
 import ape.nexitool.tools.*;
+import ape.nexitool.tools.Sizer;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
@@ -93,6 +94,16 @@ public class Main {
       FitBox.process(input, output, Double.parseDouble(args[3]));
       return;
     }
+    if (args[0].equals("center")) {
+      if (args.length != 3) {
+        help();
+        return;
+      }
+      String input = args[1];
+      String output = args[2];
+      Center.process(input, output);
+      return;
+    }
     if (args[0].equals("copy-animations")) {
       if (args.length != 4) {
         help();
@@ -112,7 +123,6 @@ public class Main {
       String model = args[1];
       ListAnimations.process(model);
     }
-
     if (args[0].equals("norm-animations")) {
       if (args.length != 3) {
         help();

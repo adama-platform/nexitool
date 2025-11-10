@@ -40,5 +40,6 @@ public class NormalizeMaterials {
     }
     // final:
     Files.writeString(Paths.get(output), root.toPrettyString());
+    System.out.println("Normalized materials");
   }
 }
