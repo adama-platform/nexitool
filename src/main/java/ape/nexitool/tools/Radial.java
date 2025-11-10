@@ -10,70 +10,6 @@ import java.util.Iterator;
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Radial {
-  // Stage 1: Coordinates in Pixel Space
-  private static class Candidate {
-    public final int x;
-    public final int y;
-
-    public Candidate(int x, int y) {
-      this.x = x;
-      this.y = y;
-    }
-  }
-
-  // Stage 2[representation]: A Cluster Points in Pixel Space
-  private static class PreciseAccumulator {
-    private double x;
-    private double y;
-
-    public ArrayList<Candidate> candidates;
-    private Candidate last;
-
-    public int n;
-    public PreciseAccumulator() {
-      this.x = 0;
-      this.y = 0;
-      this.n = 0;
-      this.candidates = new ArrayList<Candidate>();
-    }
-
-    public void add(Candidate candidate) {
-      this.x += candidate.x;
-      this.y += candidate.y;
-      this.n++;
-      this.candidates.add(candidate);
-    }
-
-    public double x() {
-      return x / n;
-    }
-
-    public double y() {
-      return y / n;
-    }
-
-    private static boolean isNeighbor(Candidate c1, Candidate c2) {
-      return Math.abs(c1.x - c2.x) <= 2 && Math.abs(c1.y - c2.y) <= 2;
-    }
-
-    public boolean isTouching(Candidate candidate) {
-      if (last != null) {
-        if (isNeighbor(last, candidate)) {
-          last = candidate;
-          return true;
-        }
-      }
-
-      for (Candidate c : candidates) {
-        if (isNeighbor(c, candidate)) {
-          last = candidate;
-          return true;
-        }
-      }
-      return false;
-    }
-  }
-
   // Stage 2[algorithm] Picking a Cluster (assumes candidates come from yx scanning such that any new (x, y) is after any prior point in the cluster
   private static PreciseAccumulator pickBest(ArrayList<PreciseAccumulator> prior, Candidate candidate) {
     for (PreciseAccumulator p : prior) {
@@ -102,57 +38,6 @@ public class Radial {
       winner.add(candidate);
     }
     return result;
-  }
-
-  // Stage 3[representation]: represent the points around the center
-  private static class RadialPoint implements Comparable<RadialPoint> {
-    public final double dx;
-    public final double dy;
-    public final double radius;
-    public final double angle;
-
-    private boolean killed;
-
-    public RadialPoint(double dx, double dy) {
-      this.dx = dx;
-      this.dy = dy;
-      this.radius = Math.sqrt(dx*dx + dy*dy);
-      double raw = Math.atan2(dy, dx);;
-      if (raw < 0) {
-        raw += Math.PI * 2;
-      }
-      this.angle = raw;
-      this.killed = false;
-    }
-
-    public RadialPoint(double dx, double dy, double radius, double angle) {
-      this.dx = dx;
-      this.dy = dy;
-      this.radius = radius;
-      this.angle = angle;
-      this.killed = false;
-    }
-
-    public void kill() {
-      this.killed = true;
-    }
-
-    public void resurrect() {
-      this.killed = false;
-    }
-
-    public boolean alive() {
-      return !killed;
-    }
-
-    @Override
-    public int compareTo(RadialPoint o) {
-      return Double.compare(angle, o.angle);
-    }
-
-    public RadialPoint augment(int m) {
-      return new RadialPoint(dx, dy, radius, angle + 2 * Math.PI * m);
-    }
   }
 
   // Stage 3[algorithm] polarize all the points
@@ -200,38 +85,6 @@ public class Radial {
     return a.radius * lambda + b.radius * (1 - lambda);
   }
 
-  public static class Sampler {
-    private final ArrayList<RadialPoint> points;
-    private final Iterator<RadialPoint> it;
-    private RadialPoint last;
-    private RadialPoint current;
-    private boolean done;
-
-    public Sampler(ArrayList<RadialPoint> points) {
-      this.points = points;
-      this.it = points.iterator();
-      this.last = points.get(points.size() - 1).augment(-1);
-      this.current = it.next();
-      this.done = false;
-    }
-
-    public double radius(double angle) {
-      if (!done) {
-        while (angle > current.angle && !done) {
-          if (it.hasNext()) {
-            last = current;
-            current = it.next();
-          } else {
-            last = current;
-            current = points.get(0).augment(1);
-            done = true;
-          }
-        }
-      }
-      return radiusIntersect(angle, last, current);
-    }
-  }
-
   public static ArrayList<RadialPoint> superSample(ArrayList<RadialPoint> points, int divisions) {
     ArrayList<RadialPoint> result = new ArrayList<>();
     Sampler sampler = new Sampler(points);
@@ -243,7 +96,6 @@ public class Radial {
     return result;
   }
 
-
   public static ArrayList<RadialPoint> averageWithFlipY(ArrayList<RadialPoint> points, int divisions) {
     ArrayList<RadialPoint> flipped = new ArrayList<>();
     for (RadialPoint rp : points) {
@@ -251,7 +103,6 @@ public class Radial {
     }
     points.sort(RadialPoint::compareTo);
     flipped.sort(RadialPoint::compareTo);
-
     ArrayList<RadialPoint> result = new ArrayList<>();
     Sampler sampler_a = new Sampler(points);
     Sampler sampler_b = new Sampler(flipped);
@@ -262,7 +113,6 @@ public class Radial {
     }
     return result;
   }
-
 
   private static ArrayList<RadialPoint> killExactlyOne(ArrayList<RadialPoint> points) {
     points.sort(RadialPoint::compareTo);
@@ -294,7 +144,6 @@ public class Radial {
     return reduced;
   }
 
-
   private static ArrayList<RadialPoint> flipY(ArrayList<RadialPoint> points) {
     ArrayList<RadialPoint> reduced = new ArrayList<RadialPoint>();
     for (RadialPoint rp : points) {
@@ -307,8 +156,7 @@ public class Radial {
     return reduced;
   }
 
-
-  public static void process(String input, String output) throws Exception{
+  public static void process(String input, String output) throws Exception {
     BufferedImage img = ImageIO.read(new File(input));
     ArrayList<Candidate> edges = new ArrayList<Candidate>();
     PreciseAccumulator center = new PreciseAccumulator();
@@ -329,7 +177,6 @@ public class Radial {
         test.setRGB(x, y, Color.WHITE.getRGB());
       }
     }
-
     ArrayList<PreciseAccumulator> reduced = estimateEdges(edges);
     double cx = center.x();
     double cy = center.y();
@@ -346,7 +193,6 @@ public class Radial {
     while (polar.size() > 64) {
       polar = killExactlyOne(polar);
     }
-
     double max_radius = 1;
     for (RadialPoint p : polar) {
       int x = (int) (cx - Math.cos(p.angle) * p.radius);
@@ -354,7 +200,6 @@ public class Radial {
       test.setRGB(x, y, Color.RED.getRGB());
       max_radius = Math.max(max_radius, p.radius);
     }
-
     StringBuilder func = new StringBuilder();
     func.append("function radial() -> float[] {\n  return [");
     boolean notFirst = false;
@@ -366,11 +211,154 @@ public class Radial {
       func.append(p.angle + "f, " + (p.radius / max_radius)).append("f\n      ");
     }
     func.append("];\n}\n");
-    System.out.println(func.toString());
+    System.out.println(func);
     test.setRGB((int) cx, (int) cy, Color.RED.getRGB());
     if (output != null) {
       ImageIO.write(test, "png", new File(output));
     }
+  }
 
+  // Stage 1: Coordinates in Pixel Space
+  private static class Candidate {
+    public final int x;
+    public final int y;
+
+    public Candidate(int x, int y) {
+      this.x = x;
+      this.y = y;
+    }
+  }
+
+  // Stage 2[representation]: A Cluster Points in Pixel Space
+  private static class PreciseAccumulator {
+    public ArrayList<Candidate> candidates;
+    public int n;
+    private double x;
+    private double y;
+    private Candidate last;
+
+    public PreciseAccumulator() {
+      this.x = 0;
+      this.y = 0;
+      this.n = 0;
+      this.candidates = new ArrayList<Candidate>();
+    }
+
+    private static boolean isNeighbor(Candidate c1, Candidate c2) {
+      return Math.abs(c1.x - c2.x) <= 2 && Math.abs(c1.y - c2.y) <= 2;
+    }
+
+    public void add(Candidate candidate) {
+      this.x += candidate.x;
+      this.y += candidate.y;
+      this.n++;
+      this.candidates.add(candidate);
+    }
+
+    public double x() {
+      return x / n;
+    }
+
+    public double y() {
+      return y / n;
+    }
+
+    public boolean isTouching(Candidate candidate) {
+      if (last != null) {
+        if (isNeighbor(last, candidate)) {
+          last = candidate;
+          return true;
+        }
+      }
+      for (Candidate c : candidates) {
+        if (isNeighbor(c, candidate)) {
+          last = candidate;
+          return true;
+        }
+      }
+      return false;
+    }
+  }
+
+  // Stage 3[representation]: represent the points around the center
+  private static class RadialPoint implements Comparable<RadialPoint> {
+    public final double dx;
+    public final double dy;
+    public final double radius;
+    public final double angle;
+    private boolean killed;
+
+    public RadialPoint(double dx, double dy) {
+      this.dx = dx;
+      this.dy = dy;
+      this.radius = Math.sqrt(dx * dx + dy * dy);
+      double raw = Math.atan2(dy, dx);
+      if (raw < 0) {
+        raw += Math.PI * 2;
+      }
+      this.angle = raw;
+      this.killed = false;
+    }
+
+    public RadialPoint(double dx, double dy, double radius, double angle) {
+      this.dx = dx;
+      this.dy = dy;
+      this.radius = radius;
+      this.angle = angle;
+      this.killed = false;
+    }
+
+    public void kill() {
+      this.killed = true;
+    }
+
+    public void resurrect() {
+      this.killed = false;
+    }
+
+    public boolean alive() {
+      return !killed;
+    }
+
+    @Override
+    public int compareTo(RadialPoint o) {
+      return Double.compare(angle, o.angle);
+    }
+
+    public RadialPoint augment(int m) {
+      return new RadialPoint(dx, dy, radius, angle + 2 * Math.PI * m);
+    }
+  }
+
+  public static class Sampler {
+    private final ArrayList<RadialPoint> points;
+    private final Iterator<RadialPoint> it;
+    private RadialPoint last;
+    private RadialPoint current;
+    private boolean done;
+
+    public Sampler(ArrayList<RadialPoint> points) {
+      this.points = points;
+      this.it = points.iterator();
+      this.last = points.get(points.size() - 1).augment(-1);
+      this.current = it.next();
+      this.done = false;
+    }
+
+    public double radius(double angle) {
+      if (!done) {
+        while (angle > current.angle && !done) {
+          if (it.hasNext()) {
+            last = current;
+            current = it.next();
+          } else {
+            last = current;
+            current = points.get(0).augment(1);
+            done = true;
+          }
+        }
+      }
+      return radiusIntersect(angle, last, current);
+    }
   }
 }

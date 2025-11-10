@@ -1,7 +1,8 @@
 package ape.nexitool;
 
-import ape.nexitool.tools.SetHeight;
+import ape.nexitool.tools.NormalizeMaterials;
 import ape.nexitool.tools.Radial;
+import ape.nexitool.tools.Resize;
 import ape.nexitool.tools.Sizer;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
@@ -13,7 +14,7 @@ public class Main {
     System.out.println("nexitool help <- this screen");
     System.out.println("nexitool radial imagefile.png");
     System.out.println("nexitool get-size model.gd3j");
-    System.out.println("nexitool set-height input.g3dj output.g3dj height");
+    System.out.println("nexitool norm-mat input.g3dj output.g3dj");
   }
   public static void main(String[] args) throws Exception {
     if (args.length == 0) {
@@ -39,15 +40,24 @@ public class Main {
       }
       Sizer.process(args[1]);
     }
-    if (args[0].equals("set-height")) {
+    if (args[0].equals("norm-mat")) {
+      if (args.length != 3) {
+        help();
+        return;
+      }
+      String input = args[1];
+      String output = args[2];
+      NormalizeMaterials.process(input, output);
+      return;
+    }
+    if (args[0].equals("resize")) {
       if (args.length != 4) {
         help();
         return;
       }
       String input = args[1];
       String output = args[2];
-      double height = Double.parseDouble(args[3]);
-      SetHeight.process(input, output, height);
+      Resize.process(input, output, Double.parseDouble(args[3]));
       return;
     }
   }
