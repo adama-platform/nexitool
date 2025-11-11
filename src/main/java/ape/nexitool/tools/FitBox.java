@@ -16,5 +16,7 @@ public class FitBox {
     double scale_z = size / ( dimensions.max_z - dimensions.min_z );
     IsStaticMesh.warnIfNotStaticMesh(root);
     Resize.processPostLoad(root, outputPath, Math.min(scale_x, scale_z));
+
+    System.out.println("Finished: fitting the model to a size:" + size);
   }
 }

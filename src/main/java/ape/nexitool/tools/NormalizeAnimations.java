@@ -25,5 +25,6 @@ public class NormalizeAnimations {
       root.set("animations", next);
     }
     Files.writeString(Paths.get(output), root.toPrettyString());
+    System.out.println("Finished: normalizing animation names");
   }
 }

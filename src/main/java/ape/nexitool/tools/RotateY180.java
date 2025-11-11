@@ -160,7 +160,7 @@ public class RotateY180 {
     flipNodes(root.get("nodes"));
     flipAnimations(root);
     Files.writeString(Paths.get(outputPath), root.toPrettyString());
-    System.out.println("Rotated 180");
+    System.out.println("Finished: rotating 180 degrees around y-axis");
   }
 
   public static void process(String inputPath, String outputPath) throws IOException {

@@ -128,7 +128,7 @@ public class Resize {
     scaleNodes(root.get("nodes"), scale);
     scaleAnimations(root, scale);
     Files.writeString(Paths.get(outputPath), root.toPrettyString());
-    System.out.println("Resized by Scale:" + scale);
+    System.out.println("Finished: resizing by " + scale);
   }
 
   public static void process(String inputPath, String outputPath, double scale) throws IOException {

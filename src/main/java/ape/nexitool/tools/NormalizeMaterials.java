@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.TreeMap;
 
 public class NormalizeMaterials {
@@ -19,8 +21,15 @@ public class NormalizeMaterials {
     String[] next = new String[]{"a", "b", "c", "d", "e", "f"};
     for (int k = 0; k < materials.size(); k++) {
       ObjectNode material = (ObjectNode) materials.get(k);
+      Iterator<Map.Entry<String, JsonNode>> fIt = material.fields();
+      while (fIt.hasNext()) {
+        Map.Entry<String, JsonNode> f = fIt.next();
+        if (!f.getKey().equals("id")) {
+          fIt.remove();
+        }
+      }
       materialMap.put(material.get("id").asText(), next[k]);
-      System.out.println("Mapping " + material.get("id").asText() + " to " + next[k]);
+      System.out.println("Progress: mapping '" + material.get("id").asText() + "' to " + next[k]);
       material.put("id", next[k]);
     }
     if (root.has("nodes")) {
@@ -40,6 +49,6 @@ public class NormalizeMaterials {
     }
     // final:
     Files.writeString(Paths.get(output), root.toPrettyString());
-    System.out.println("Normalized materials");
+    System.out.println("Finished: normalizing materials to nexidrive registers");
   }
 }

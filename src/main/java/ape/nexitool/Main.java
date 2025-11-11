@@ -14,7 +14,6 @@ public class Main {
     System.out.println("nexitool get-size model.gd3j");
     System.out.println("nexitool norm-materials input.g3dj output.g3dj");
     System.out.println("nexitool resize input.g3dj output.g3dj scale");
-    System.out.println("nexitool set-height input.g3dj output.g3dj height");
     System.out.println("nexitool fitbox input.g3dj output.g3dj size");
     System.out.println("nexitool copy-animations animation.g3dj model.g3dj output.g3dj");
     System.out.println("nexitool list-animations animation.g3dj");
@@ -72,16 +71,6 @@ public class Main {
       String input = args[1];
       String output = args[2];
       RotateY180.process(input, output);
-      return;
-    }
-    if (args[0].equals("set-height")) {
-      if (args.length != 4) {
-        help();
-        return;
-      }
-      String input = args[1];
-      String output = args[2];
-      SetHeight.process(input, output, Double.parseDouble(args[3]));
       return;
     }
     if (args[0].equals("fit-box")) {

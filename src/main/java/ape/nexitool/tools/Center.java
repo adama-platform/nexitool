@@ -325,13 +325,16 @@ public class Center {
     double cz = (big.min_z + big.max_z) / 2.0;
 
     translateNodes(root, cx, cy, cz);
-    System.out.println("CX: " + Math.round(cx * 10) / 10.0 + " CY: " + Math.round(cy * 10) / 10.0 + " CZ: " + Math.round(cz * 10) / 10.0);
+    System.out.println("[center] " + Math.round(cx * 10) / 10.0 + ", " + Math.round(cy * 10) / 10.0 + ", " + Math.round(cz * 10) / 10.0);
 
     double radius = Math.min(big.max_z - big.min_z, big.max_x - big.min_x) * 0.5f;
     double height = (big.max_y - big.min_y) - 2 * radius;
 
-    System.out.println("CAPSULE: a:" + radius + ", b:" + height);
+    System.out.println("[center][capsule] a:" + radius + ", b:" + height);
 
     Files.writeString(Paths.get(outputPath), root.toPrettyString());
+
+
+    System.out.println("Finished: centering the model");
   }
 }
