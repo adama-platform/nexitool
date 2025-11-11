@@ -29,11 +29,7 @@ public class Center {
 
     @Override
     public String toString() {
-      return "Vertex{" +
-              "x=" + x +
-              ", y=" + y +
-              ", z=" + z +
-              '}';
+      return "V{" + x + ", " + y + ", " + z + "}";
     }
   }
 
@@ -81,13 +77,12 @@ public class Center {
 
     @Override
     public String toString() {
-      return "Box{" +
-              " min_x=" + min_x +
-              ", min_y=" + min_y +
-              ", min_z=" + min_z +
-              ", max_x=" + max_x +
-              ", max_y=" + max_y +
-              ", max_z=" + max_z +
+      return "Box{Min=" + min_x +
+              ", " + min_y +
+              ", " + min_z +
+              " Max=" + max_x +
+              ", " + max_y +
+              ", " + max_z +
               '}';
     }
   }
@@ -171,29 +166,23 @@ public class Center {
   public static void translateNodes(JsonNode root, double cx, double cy, double cz) {
     ArrayNode nodes = (ArrayNode) root.get("nodes");
     for (int k = 0; k < nodes.size(); k++) {
-      JsonNode node = nodes.get(k);
-      ArrayNode translation = (ArrayNode) node.get("translation");
-      if (translation != null) {
-        translation.set(0, 0);
-        translation.set(1, 0);
-        translation.set(2, 0);
+      ObjectNode node = (ObjectNode) nodes.get(k);
+      if (node.has("translation")) { // it is ignored, so we simply remove it
+        node.remove("translation");
       }
-      /*
       if (node.has("children")) {
         ArrayNode children = (ArrayNode) node.get("children");
         for (int i = 0; i < children.size(); i++) {
           ObjectNode child = (ObjectNode) children.get(i);
-          if (child.has("id")) {
-            if (child.get("id").asText().equals("root")) {
-              ArrayNode translations = child.putArray("translation");
-              translations.add(-cx);
-              translations.add(-cy);
-              translations.add(-cz);
-            }
+          if (child.has("translation")) {
+            child.remove("translation");
           }
+          ArrayNode translations = child.putArray("translation");
+          translations.add(-cx);
+          translations.add(-cy);
+          translations.add(-cz);
         }
       }
-      */
     }
   }
 
@@ -322,7 +311,6 @@ public class Center {
       if (boneBoxes != null) {
         for (Box box : boneBoxes) {
           Box toAdd = box.cloneWithTranslation(vertex.x, vertex.y, vertex.z);
-          System.out.println("ADD:" + toAdd + " via " + bone + "/" + vertex);
           if (big == null) {
             big = toAdd;
           } else {
@@ -332,16 +320,17 @@ public class Center {
       }
     }
 
-
-    System.out.println("TOTAL:" + big);
-
     double cx = (big.min_x + big.max_x) / 2.0;
     double cy = (big.min_y + big.max_y) / 2.0;
     double cz = (big.min_z + big.max_z) / 2.0;
 
-    System.out.println("BIG:" + big);
     translateNodes(root, cx, cy, cz);
     System.out.println("CX: " + Math.round(cx * 10) / 10.0 + " CY: " + Math.round(cy * 10) / 10.0 + " CZ: " + Math.round(cz * 10) / 10.0);
+
+    double radius = Math.min(big.max_z - big.min_z, big.max_x - big.min_x) * 0.5f;
+    double height = (big.max_y - big.min_y) - 2 * radius;
+
+    System.out.println("CAPSULE: a:" + radius + ", b:" + height);
 
     Files.writeString(Paths.get(outputPath), root.toPrettyString());
   }
