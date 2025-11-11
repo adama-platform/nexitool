@@ -174,10 +174,26 @@ public class Center {
       JsonNode node = nodes.get(k);
       ArrayNode translation = (ArrayNode) node.get("translation");
       if (translation != null) {
-        translation.set(0, translation.get(0).asDouble() - cx);
-        translation.set(1, translation.get(1).asDouble() - cy);
-        translation.set(2, translation.get(2).asDouble() - cz);
+        translation.set(0, 0);
+        translation.set(1, 0);
+        translation.set(2, 0);
       }
+      /*
+      if (node.has("children")) {
+        ArrayNode children = (ArrayNode) node.get("children");
+        for (int i = 0; i < children.size(); i++) {
+          ObjectNode child = (ObjectNode) children.get(i);
+          if (child.has("id")) {
+            if (child.get("id").asText().equals("root")) {
+              ArrayNode translations = child.putArray("translation");
+              translations.add(-cx);
+              translations.add(-cy);
+              translations.add(-cz);
+            }
+          }
+        }
+      }
+      */
     }
   }
 
