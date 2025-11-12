@@ -37,6 +37,12 @@ public class Resize {
 
   private static void scaleNode(JsonNode node, double scale) {
     scaleVector(node.get("translation"), scale);
+    if (node.has("scale")) {
+      ArrayNode scaleArray = (ArrayNode) node.get("scale");
+      for (int i = 0; i < scaleArray.size(); i++) {
+        scaleArray.set(i, 1.0);
+      }
+    }
     JsonNode parts = node.get("parts");
     if (parts instanceof ArrayNode pArray) {
       for (int j = 0; j < pArray.size(); j++) {
