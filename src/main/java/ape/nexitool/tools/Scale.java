@@ -1,5 +1,6 @@
 package ape.nexitool.tools;
 
+import ape.nexitool.tools.json.VertexAttributes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -9,23 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class Resize {
-  private static int getComponentCount(String attr) {
-    if (attr.equals("POSITION") || attr.equals("NORMAL") || attr.equals("TANGENT") || attr.equals("BINORMAL")) {
-      return 3;
-    } else if (attr.startsWith("TEXCOORD")) {
-      return 2;
-    } else if (attr.startsWith("COLOR")) {
-      return 4;
-    } else if (attr.equals("COLORPACKED")) {
-      return 1;
-    } else if (attr.startsWith("BLENDWEIGHT") || attr.startsWith("BLENDINDICES")) {
-      return 2; // WTF
-    } else {
-      throw new IllegalArgumentException("Unknown attribute: " + attr);
-    }
-  }
-
+public class Scale {
   private static void scaleVector(JsonNode vec, double scale) {
     if (vec instanceof ArrayNode v) {
       for (int i = 0; i < v.size(); i++) {
@@ -85,7 +70,7 @@ public class Resize {
           int offset = 0;
           for (int i = 0; i < attrs.size(); i++) {
             String attr = attrs.get(i).asText();
-            int count = getComponentCount(attr);
+            int count = VertexAttributes.getComponentCount(attr);
             if ("POSITION".equals(attr)) {
               posOffset = offset;
             }

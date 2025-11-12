@@ -60,7 +60,7 @@ public class Main {
       }
       String input = args[1];
       String output = args[2];
-      Resize.process(input, output, Double.parseDouble(args[3]));
+      Scale.process(input, output, Double.parseDouble(args[3]));
       return;
     }
     if (args[0].equals("rotate-y-180")) {
@@ -71,6 +71,36 @@ public class Main {
       String input = args[1];
       String output = args[2];
       RotateY180.process(input, output);
+      return;
+    }
+    if (args[0].equals("ensure-static")) {
+      if (args.length != 3) {
+        help();
+        return;
+      }
+      String input = args[1];
+      String output = args[2];
+      EnsureStatic.process(input, output);
+      return;
+    }
+    if (args[0].equals("rotate-x-90")) {
+      if (args.length != 3) {
+        help();
+        return;
+      }
+      String input = args[1];
+      String output = args[2];
+      RotateX90.process(input, output);
+      return;
+    }
+    if (args[0].equals("rotate-z-90")) {
+      if (args.length != 3) {
+        help();
+        return;
+      }
+      String input = args[1];
+      String output = args[2];
+      RotateZ90.process(input, output);
       return;
     }
     if (args[0].equals("fit-box")) {
@@ -120,6 +150,24 @@ public class Main {
       String input = args[1];
       String output = args[2];
       NormalizeAnimations.process(input, output);
+    }
+    if (args[0].equals("flip-indicies")) {
+      if (args.length != 3) {
+        help();
+        return;
+      }
+      String input = args[1];
+      String output = args[2];
+      FlipIndices.process(input, output);
+    }
+    if (args[0].equals("align-floor")) {
+      if (args.length != 3) {
+        help();
+        return;
+      }
+      String input = args[1];
+      String output = args[2];
+      AlignWithFloor.process(input, output);
     }
   }
 }
