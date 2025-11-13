@@ -2,6 +2,7 @@ package ape.nexitool;
 
 import ape.nexitool.tools.*;
 import ape.nexitool.tools.Sizer;
+import ape.nexitool.viewer.Tool;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
@@ -152,6 +153,10 @@ public class Main {
       String model = args[2];
       String output = args[3];
       CopyAnimations.process(animation, model, output);
+      return;
+    }
+    if (args[0].equals("viewer")) {
+      Tool.main(args);
       return;
     }
     if (args[0].equals("list-animations")) {
