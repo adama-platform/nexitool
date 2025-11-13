@@ -63,6 +63,16 @@ public class Main {
       Scale.process(input, output, Double.parseDouble(args[3]));
       return;
     }
+    if (args[0].equals("center-base")) {
+      if (args.length != 4) {
+        help();
+        return;
+      }
+      String input = args[1];
+      String output = args[2];
+      CenterBase.process(input, output, Double.parseDouble(args[3]));
+      return;
+    }
     if (args[0].equals("rotate-y-180")) {
       if (args.length != 3) {
         help();
@@ -121,6 +131,16 @@ public class Main {
       String input = args[1];
       String output = args[2];
       Center.process(input, output);
+      return;
+    }
+    if (args[0].equals("set-y-center-xz")) {
+      if (args.length != 4) {
+        help();
+        return;
+      }
+      String input = args[1];
+      String output = args[2];
+      SetYAndCenterXZ.process(input, output, Double.parseDouble(args[3]));
       return;
     }
     if (args[0].equals("copy-animations")) {

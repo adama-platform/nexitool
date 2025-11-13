@@ -20,6 +20,9 @@ public class IsStaticMesh {
             }
           }
         }
+        if (node.has("children")) {
+          System.out.println("[WARNING: MESH IS NOT STATIC]");
+        }
       }
     }
     return true;
