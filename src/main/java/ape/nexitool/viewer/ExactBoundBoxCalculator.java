@@ -1,8 +1,6 @@
 package ape.nexitool.viewer;
 
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
@@ -12,12 +10,10 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FlushablePool;
 
-public class BBox {  // See helper below
-  /**
-   * Computes the exact world-space bounding box by mirroring GPU skinning.
-   * Uses Renderable system — same as ModelBatch.
-   */
-  public static BoundingBox calculateBoundingBoxWithBones(final ModelInstance instance) {
+import java.util.function.Consumer;
+
+public class ExactBoundBoxCalculator {  // See helper below
+  public static BoundingBox calculate(final ModelInstance instance, Consumer<Vector3> points) {
     instance.calculateTransforms();  // Critical: updates node.worldTransform + instance.bones
     BoundingBox bounds = new BoundingBox();
     Vector3 min = new Vector3(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
@@ -67,9 +63,12 @@ public class BBox {  // See helper below
           }
           if (total > 0) skinnedPos.scl(1f / total);
         } else {
-          localPos.set(skinnedPos).mul(r.worldTransform);
+          skinnedPos.set(localPos).mul(r.worldTransform);
         }
         // Update bounds
+        if (points != null) {
+          points.accept(skinnedPos);
+        }
         min.x = Math.min(min.x, skinnedPos.x);
         min.y = Math.min(min.y, skinnedPos.y);
         min.z = Math.min(min.z, skinnedPos.z);

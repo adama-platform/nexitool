@@ -2,7 +2,6 @@ package ape.nexitool.viewer;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
@@ -21,7 +20,6 @@ import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.UBJsonReader;
-import com.badlogic.gdx.utils.UBJsonWriter;
 
 public class Scene extends ApplicationAdapter {
   private PerspectiveCamera cam;
@@ -67,7 +65,7 @@ public class Scene extends ApplicationAdapter {
     sample = loader.loadModel(Gdx.files.internal(file));
     sampleI = new ModelInstance(sample);
 
-    BoundingBox box = BBox.calculateBoundingBoxWithBones(sampleI);
+    BoundingBox box = ExactBoundBoxCalculator.calculate(sampleI, null);
 
     C = box.min.x;
     D = box.min.y;
