@@ -1,4 +1,4 @@
-package ape.nexitool.tools;
+package ape.nexitool.tools.defunct;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;

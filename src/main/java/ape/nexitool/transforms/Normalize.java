@@ -1,21 +1,17 @@
-package ape.nexitool.tools;
+package ape.nexitool.transforms;
 
+import ape.nexitool.contracts.Transform;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class NormalizeMaterials {
-  public static void process(String input, String output) throws Exception {
-    String json = Files.readString(Paths.get(input));
-    ObjectMapper mapper = new ObjectMapper();
-    JsonNode root = mapper.readTree(json);
+public class Normalize implements Transform {
+  @Override
+  public void execute(ObjectNode root) {
     ArrayNode materials = (ArrayNode) root.get("materials");
     TreeMap<String, String> materialMap = new TreeMap<>();
     String[] next = new String[]{"a", "b", "c", "d", "e", "f"};
@@ -47,8 +43,14 @@ public class NormalizeMaterials {
         }
       }
     }
-    // final:
-    Files.writeString(Paths.get(output), root.toPrettyString());
-    System.out.println("Finished: normalizing materials to nexidrive registers");
+    ArrayNode animations = (ArrayNode) root.get("animations");
+    if (animations != null) {
+     for (int k = 0; k < animations.size(); k++) {
+        ObjectNode animation = (ObjectNode) animations.get(k);
+        String id = animation.get("id").asText();
+        id = id.trim().toLowerCase();
+        animation.put("id", id);
+      }
+    }
   }
 }
