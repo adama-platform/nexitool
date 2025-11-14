@@ -66,12 +66,14 @@ public class Pipeline {
       case "make-min-y-zero": {
         BoundingBox box = Sizing.of(root);
         new Translate(new Vector3(0, -box.min.y,0)).execute(root);
+        System.out.println("mod: translated y by " + -box.min.y + " to zero out");
         break;
       }
       case "center": {
         BoundingBox box = Sizing.of(root);
         Vector3 center = box.min.cpy().add(box.max).scl(-0.5f);
         new Translate(center).execute(root);
+        System.out.println("mod: translated by " + center.x + "," + center.y + "," + center.z + " to center");
         break;
       }
       case "center-base-xz": {
@@ -81,6 +83,7 @@ public class Pipeline {
         Vector3 center = box.min.cpy().add(box.max).scl(-0.5f);
         center.y = 0;
         new Translate(center).execute(root);
+        System.out.println("mod: translated by " + center.x + "," + center.y + "," + center.z + " to center based below " + max_y);
         break;
       }
       case "set-min-y": {
@@ -88,6 +91,7 @@ public class Pipeline {
         next++;
         BoundingBox box = Sizing.of(root);
         new Translate(new Vector3(0, min_y - box.min.y, 0)).execute(root);
+        System.out.println("mod: translated y by " + (min_y - box.min.y) + " to push min y to " + min_y);
         break;
       }
     }
