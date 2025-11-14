@@ -1,19 +1,99 @@
 package ape.nexitool.viewer;
 
 import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FlushablePool;
 
+import java.util.ArrayList;
+import java.util.TreeSet;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class ExactBoundBoxCalculator {  // See helper below
-  public static BoundingBox calculate(final ModelInstance instance, Consumer<Vector3> points) {
+
+  private static boolean integrate(Renderable r, MeshPart meshPart, Vector3 min, Vector3 max, Function<Vector3, Boolean> points) {
+    final Vector3 localPos = new Vector3();
+    final Vector3 skinnedPos = new Vector3();
+    final Vector3 tmp = new Vector3();
+
+    // extract vertices
+    int stride = meshPart.mesh.getVertexSize() / 4;
+    float[] vertices = new float[meshPart.mesh.getNumVertices() * stride];
+    meshPart.mesh.getVertices(vertices);
+
+    // dedupe the indices and select only for this mesh part
+    TreeSet<Integer> used = new TreeSet<>();
+    {
+      short[] indices = new short[meshPart.mesh.getNumIndices()];
+      meshPart.mesh.getIndices(indices);
+      for (int i = 0; i < meshPart.size; i++) {
+        used.add((int) indices[meshPart.offset + i]);
+      }
+    }
+
+    // get bone offsets
+    int posOffset = meshPart.mesh.getVertexAttribute(com.badlogic.gdx.graphics.VertexAttributes.Usage.Position).offset / 4;
+    ArrayList<Integer> boneOffsets = new ArrayList<>();
+    for (VertexAttribute a : meshPart.mesh.getVertexAttributes()) {
+      if (a.usage == VertexAttributes.Usage.BoneWeight) {
+        boneOffsets.add(a.offset / 4);
+      }
+    }
+
+    Consumer<Vector3> consider = (p) -> {
+      // Update bounds
+      boolean allowed = true;
+      if (points != null) {
+        allowed = points.apply(p);
+      }
+      if (allowed) {
+        min.x = Math.min(min.x, p.x);
+        min.y = Math.min(min.y, p.y);
+        min.z = Math.min(min.z, p.z);
+        max.x = Math.max(max.x, p.x);
+        max.y = Math.max(max.y, p.y);
+        max.z = Math.max(max.z, p.z);
+      }
+    };
+
+    boolean isSkinned = r.bones != null && r.bones.length > 0 && !boneOffsets.isEmpty();
+    for (int index : used) {
+      int i = index * stride;
+      int p = i + posOffset;
+      localPos.set(vertices[p], vertices[p + 1], vertices[p + 2]);
+      if (isSkinned) {
+        skinnedPos.set(0, 0, 0);
+        float total = 0;
+        for (int k = 0; k < boneOffsets.size(); k++) {
+          int bw = i + boneOffsets.get(k);
+          int idx = Math.min(r.bones.length - 1, Math.max(0, (int) vertices[bw]));
+          float weight = vertices[bw + 1];
+          total += weight;
+          if (0 <= idx && idx < r.bones.length) {
+            tmp.set(localPos).mul(r.bones[idx]).scl(weight);
+            skinnedPos.add(tmp);
+          } else {
+            tmp.set(localPos).scl(weight);
+          }
+        }
+        if (total > 0) skinnedPos.scl(1f / total);
+        skinnedPos.mul(r.worldTransform);
+        consider.accept(skinnedPos);
+      } else {
+        skinnedPos.set(localPos).mul(r.worldTransform);
+        consider.accept(skinnedPos);
+      }
+    }
+
+    return !used.isEmpty();
+  }
+  public static BoundingBox calculate(final ModelInstance instance, Function<Vector3, Boolean> points) {
     instance.calculateTransforms();  // Critical: updates node.worldTransform + instance.bones
     BoundingBox bounds = new BoundingBox();
     Vector3 min = new Vector3(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
@@ -22,69 +102,18 @@ public class ExactBoundBoxCalculator {  // See helper below
     RenderablePool pool = new RenderablePool();
     Array<Renderable> renderables = new Array<>();
     instance.getRenderables(renderables, pool);
-    final Vector3 localPos = new Vector3();
-    final Vector3 skinnedPos = new Vector3();
-    final Vector3 tmp = new Vector3();
-    final Matrix4 boneMat = new Matrix4();
     for (Renderable r : renderables) {
       MeshPart meshPart = r.meshPart;
       if (meshPart == null || meshPart.mesh == null) continue;
-      // Extract vertices
-      int vSize = (meshPart.mesh.getVertexSize() / 4);
-      float[] vertices = new float[meshPart.mesh.getNumVertices() * vSize];
-      meshPart.mesh.getVertices(vertices);
-      int stride = meshPart.mesh.getVertexSize() / 4;
-      int posOffset = meshPart.mesh.getVertexAttribute(com.badlogic.gdx.graphics.VertexAttributes.Usage.Position).offset / 4;
-      VertexAttribute boneAttribute = meshPart.mesh.getVertexAttribute(com.badlogic.gdx.graphics.VertexAttributes.Usage.BoneWeight);
-      int bwOffset = boneAttribute.offset / 4;
-      float[] weights = new float[boneAttribute.numComponents];
-      int[] indices = new int[boneAttribute.numComponents];
-
-      boolean isSkinned = r.bones != null && r.bones.length > 0;
-      for (int i = 0; i + bwOffset + 7 < vertices.length; i += stride) {
-        int p = i + posOffset;
-        localPos.set(vertices[p], vertices[p + 1], vertices[p + 2]);
-        if (isSkinned) {
-          skinnedPos.set(0, 0, 0);
-          int bw = i + bwOffset;
-          float total = 0;
-          for (int k = 0; k < weights.length; k++) {
-            weights[k] = vertices[bw + k];
-            indices[k] = (int) vertices[bw + weights.length + k];
-          }
-          for (int inf = 0; inf < weights.length; inf++) {
-            float weight = weights[inf];
-            if (weight > 0.001f && 0 <= indices[inf] && indices[inf] < r.bones.length) {
-              total += weights[inf];
-              boneMat.set(r.bones[indices[inf]]);
-              tmp.set(localPos).mul(boneMat).scl(weight);
-              skinnedPos.add(tmp);
-            }
-          }
-          if (total > 0) skinnedPos.scl(1f / total);
-        } else {
-          skinnedPos.set(localPos).mul(r.worldTransform);
-        }
-        // Update bounds
-        if (points != null) {
-          points.accept(skinnedPos);
-        }
-        min.x = Math.min(min.x, skinnedPos.x);
-        min.y = Math.min(min.y, skinnedPos.y);
-        min.z = Math.min(min.z, skinnedPos.z);
-        max.x = Math.max(max.x, skinnedPos.x);
-        max.y = Math.max(max.y, skinnedPos.y);
-        max.z = Math.max(max.z, skinnedPos.z);
+      if (integrate(r, meshPart, min, max, points)) {
         hasVerts = true;
       }
     }
-    // Clean up
     pool.flush();
     renderables.clear();
     if (hasVerts) {
       bounds.min.set(min);
       bounds.max.set(max);
-      bounds.mul(instance.transform);
     } else {
       bounds.min.set(0, 0, 0);
       bounds.max.set(0, 0, 0);

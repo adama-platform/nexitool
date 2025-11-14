@@ -2,9 +2,7 @@ package ape.nexitool.viewer;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -13,10 +11,10 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
+import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.UBJsonReader;
@@ -30,6 +28,8 @@ public class Scene extends ApplicationAdapter {
   private ModelInstance xGridInstance, yGridInstance, zGridInstance;
   private Model sample;
   private ModelInstance sampleI;
+  private Model pointCloud;
+  private ModelInstance pointCloudI;
 
   // Configurable constants for grid planes
   private float C = 0f; // x = C (YZ plane)
@@ -65,7 +65,17 @@ public class Scene extends ApplicationAdapter {
     sample = loader.loadModel(Gdx.files.internal(file));
     sampleI = new ModelInstance(sample);
 
-    BoundingBox box = ExactBoundBoxCalculator.calculate(sampleI, null);
+    ModelBuilder modelBuilder = new ModelBuilder();
+    modelBuilder.begin();
+    MeshPartBuilder part = modelBuilder.part("cloud", GL20.GL_POINTS, VertexAttributes.Usage.Position, new Material("a"));
+    part.setColor(Color.CYAN);
+    BoundingBox box = ExactBoundBoxCalculator.calculate(sampleI, (p) -> {
+      part.index(part.vertex(p.x, p.y, p.z));
+      return true;
+    });
+
+    pointCloud = modelBuilder.end();
+    pointCloudI = new ModelInstance(pointCloud);
 
     C = box.min.x;
     D = box.min.y;
@@ -133,7 +143,11 @@ public class Scene extends ApplicationAdapter {
     modelBatch.render(xGridInstance, environment);
     modelBatch.render(yGridInstance, environment);
     modelBatch.render(zGridInstance, environment);
+    sampleI.transform.idt();
     modelBatch.render(sampleI, environment);
+    if (pointCloudI != null) {
+      modelBatch.render(pointCloudI, environment);
+    }
     // Add your 3D model here, e.g.:
     // modelBatch.render(yourModelInstance, environment);
     modelBatch.end();

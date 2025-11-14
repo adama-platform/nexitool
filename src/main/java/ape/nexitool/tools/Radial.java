@@ -7,8 +7,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Radial {
   // Stage 2[algorithm] Picking a Cluster (assumes candidates come from yx scanning such that any new (x, y) is after any prior point in the cluster
   private static PreciseAccumulator pickBest(ArrayList<PreciseAccumulator> prior, Candidate candidate) {

@@ -9,6 +9,6 @@ public class Tool {
     config.setTitle("3D Model Viewer with Grids");
     config.setWindowedMode(1280, 720);
     config.useVsync(true);
-    new Lwjgl3Application(new Scene("C:\\Users\\jeff\\github\\games\\royale\\assets\\itch\\kaykit\\character.druid.g3dj"), config);
+    new Lwjgl3Application(new Scene("C:\\Users\\jeff\\github\\games\\royale\\assets\\itch\\kaykit\\character.knight.g3dj"), config);
   }
 }
