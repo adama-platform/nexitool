@@ -1,7 +1,7 @@
 package ape.nexitool.transforms;
 
 import ape.nexitool.contracts.Transform;
-import ape.nexitool.tools.json.ParsedVertexAttributes;
+import ape.nexitool.transforms.support.ParsedVertexAttributes;
 import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.TreeSet;
 
 public class Rotate implements Transform {
-
   private final Matrix3 rotation;
 
   public Rotate(Matrix3 rotation) {
@@ -83,11 +82,11 @@ public class Rotate implements Transform {
 
   private void apply(ArrayNode v, int offset) {
     Vector3 vec = new Vector3();
-    vec.x = (float) v.get(offset + 0).asDouble();
+    vec.x = (float) v.get(offset).asDouble();
     vec.y = (float) v.get(offset + 1).asDouble();
     vec.z = (float) v.get(offset + 2).asDouble();
     vec.mul(rotation);
-    v.set(offset + 0, vec.x);
+    v.set(offset, vec.x);
     v.set(offset + 1, vec.y);
     v.set(offset + 2, vec.z);
   }
@@ -98,7 +97,6 @@ public class Rotate implements Transform {
             (float) q.get(1).asDouble(),
             (float) q.get(2).asDouble(),
             (float) q.get(3).asDouble());
-
     Matrix4 tmp = new Matrix4();
     o.toMatrix(tmp.val);
     Matrix3 qMat = new Matrix3();

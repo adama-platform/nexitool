@@ -16,17 +16,14 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ExactBoundBoxCalculator {  // See helper below
-
   private static boolean integrate(Renderable r, MeshPart meshPart, Vector3 min, Vector3 max, Function<Vector3, Boolean> points) {
     final Vector3 localPos = new Vector3();
     final Vector3 skinnedPos = new Vector3();
     final Vector3 tmp = new Vector3();
-
     // extract vertices
     int stride = meshPart.mesh.getVertexSize() / 4;
     float[] vertices = new float[meshPart.mesh.getNumVertices() * stride];
     meshPart.mesh.getVertices(vertices);
-
     // dedupe the indices and select only for this mesh part
     TreeSet<Integer> used = new TreeSet<>();
     {
@@ -36,7 +33,6 @@ public class ExactBoundBoxCalculator {  // See helper below
         used.add((int) indices[meshPart.offset + i]);
       }
     }
-
     // get bone offsets
     int posOffset = meshPart.mesh.getVertexAttribute(com.badlogic.gdx.graphics.VertexAttributes.Usage.Position).offset / 4;
     ArrayList<Integer> boneOffsets = new ArrayList<>();
@@ -45,7 +41,6 @@ public class ExactBoundBoxCalculator {  // See helper below
         boneOffsets.add(a.offset / 4);
       }
     }
-
     Consumer<Vector3> consider = (p) -> {
       // Update bounds
       boolean allowed = true;
@@ -61,7 +56,6 @@ public class ExactBoundBoxCalculator {  // See helper below
         max.z = Math.max(max.z, p.z);
       }
     };
-
     boolean isSkinned = r.bones != null && r.bones.length > 0 && !boneOffsets.isEmpty();
     for (int index : used) {
       int i = index * stride;
@@ -90,9 +84,9 @@ public class ExactBoundBoxCalculator {  // See helper below
         consider.accept(skinnedPos);
       }
     }
-
     return !used.isEmpty();
   }
+
   public static BoundingBox calculate(final ModelInstance instance, Function<Vector3, Boolean> points) {
     instance.calculateTransforms();  // Critical: updates node.worldTransform + instance.bones
     BoundingBox bounds = new BoundingBox();

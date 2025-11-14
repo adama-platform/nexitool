@@ -23,7 +23,6 @@ public class EnforceStatic implements Transform {
     }
   }
 
-
   private void enforceStatic(ObjectNode node) {
     if (node.has("translation")) {
       node.remove("translation");

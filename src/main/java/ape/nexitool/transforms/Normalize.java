@@ -45,7 +45,7 @@ public class Normalize implements Transform {
     }
     ArrayNode animations = (ArrayNode) root.get("animations");
     if (animations != null) {
-     for (int k = 0; k < animations.size(); k++) {
+      for (int k = 0; k < animations.size(); k++) {
         ObjectNode animation = (ObjectNode) animations.get(k);
         String id = animation.get("id").asText();
         id = id.trim().toLowerCase();

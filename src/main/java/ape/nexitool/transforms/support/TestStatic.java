@@ -15,14 +15,11 @@ public class TestStatic {
     }
     if (root.has("animations")) {
       if (root.get("animations") instanceof ArrayNode array) {
-        if (array.size() > 0) {
-          return false;
-        }
+        return array.size() <= 0;
       }
     }
     return true;
   }
-
 
   private static boolean testNode(ObjectNode node) {
     JsonNode parts = node.get("parts");
@@ -34,9 +31,6 @@ public class TestStatic {
         }
       }
     }
-    if (node.has("children")) {
-      return false;
-    }
-    return true;
+    return !node.has("children");
   }
 }

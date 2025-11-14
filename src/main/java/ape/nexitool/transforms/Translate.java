@@ -1,7 +1,7 @@
 package ape.nexitool.transforms;
 
 import ape.nexitool.contracts.Transform;
-import ape.nexitool.tools.json.ParsedVertexAttributes;
+import ape.nexitool.transforms.support.ParsedVertexAttributes;
 import ape.nexitool.transforms.support.TestStatic;
 import com.badlogic.gdx.math.Vector3;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,7 +26,7 @@ public class Translate implements Transform {
           if (attributes.position >= 0) {
             for (int i = 0; i < verts.size(); i += attributes.stride) {
               int o = i + attributes.position;
-              verts.set(o + 0, verts.get(o + 0).doubleValue() + change.x);
+              verts.set(o, verts.get(o).doubleValue() + change.x);
               verts.set(o + 1, verts.get(o + 1).doubleValue() + change.y);
               verts.set(o + 2, verts.get(o + 2).doubleValue() + change.z);
             }
@@ -61,6 +61,7 @@ public class Translate implements Transform {
       }
     }
   }
+
   @Override
   public void execute(ObjectNode root) {
     if (TestStatic.is(root)) {

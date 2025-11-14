@@ -1,23 +1,16 @@
 package ape.nexitool.transforms;
 
 import ape.nexitool.contracts.Transform;
-import ape.nexitool.tools.json.ParsedVertexAttributes;
+import ape.nexitool.transforms.support.ParsedVertexAttributes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class Scale implements Transform {
-  private float scale;
+  private final float scale;
 
   public Scale(float scale) {
     this.scale = scale;
-  }
-
-  @Override
-  public void execute(ObjectNode root) {
-    scaleMeshes(root, scale);
-    scaleNodes(root.get("nodes"), scale);
-    scaleAnimations(root, scale);
   }
 
   private static void scaleVector(JsonNode vec, double scale) {
@@ -121,5 +114,12 @@ public class Scale implements Transform {
         }
       }
     }
+  }
+
+  @Override
+  public void execute(ObjectNode root) {
+    scaleMeshes(root, scale);
+    scaleNodes(root.get("nodes"), scale);
+    scaleAnimations(root, scale);
   }
 }

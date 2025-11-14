@@ -65,7 +65,7 @@ public class Pipeline {
       }
       case "make-min-y-zero": {
         BoundingBox box = Sizing.of(root);
-        new Translate(new Vector3(0, -box.min.y,0)).execute(root);
+        new Translate(new Vector3(0, -box.min.y, 0)).execute(root);
         System.out.println("mod: translated y by " + -box.min.y + " to zero out");
         break;
       }
@@ -92,6 +92,17 @@ public class Pipeline {
         BoundingBox box = Sizing.of(root);
         new Translate(new Vector3(0, min_y - box.min.y, 0)).execute(root);
         System.out.println("mod: translated y by " + (min_y - box.min.y) + " to push min y to " + min_y);
+        break;
+      }
+      case "fit-box": {
+        float size = Float.parseFloat(args[next]);
+        next++;
+        BoundingBox box = Sizing.of(root);
+        double scale_x = size / (box.getWidth());
+        double scale_z = size / (box.getDepth());
+        float scale = (float) Math.min(scale_x, scale_z);
+        new Scale(scale).execute(root);
+        System.out.println("mod: auto-scaled " + scale + "x to fit xz box of " + size);
         break;
       }
     }
