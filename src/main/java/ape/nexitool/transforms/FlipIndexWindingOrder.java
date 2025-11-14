@@ -1,20 +1,14 @@
-package ape.nexitool.tools;
+package ape.nexitool.transforms;
 
+import ape.nexitool.contracts.Transform;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.TreeMap;
-
-public class FlipIndices {
-
-  public static void flipIndices(JsonNode node) {
-    ArrayNode meshes = (ArrayNode) node.get("meshes");
+public class FlipIndexWindingOrder implements Transform {
+  @Override
+  public void execute(ObjectNode root) {
+    ArrayNode meshes = (ArrayNode) root.get("meshes");
     for (int k = 0; k < meshes.size(); k++) {
       JsonNode mesh = meshes.get(k);
       ArrayNode parts = (ArrayNode) mesh.get("parts");
@@ -30,13 +24,5 @@ public class FlipIndices {
         }
       }
     }
-  }
-
-  public static void process(String inputPath, String outputPath) throws IOException {
-    ObjectMapper mapper = new ObjectMapper();
-    JsonNode root = mapper.readTree(new File(inputPath));
-    flipIndices(root);
-    Files.writeString(Paths.get(outputPath), root.toPrettyString());
-    System.out.println("Finished: flipping indices");
   }
 }

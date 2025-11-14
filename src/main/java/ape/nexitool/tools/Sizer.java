@@ -1,7 +1,7 @@
 package ape.nexitool.tools;
 
 import ape.nexitool.tools.json.IsStaticMesh;
-import ape.nexitool.tools.json.VertexAttributes;
+import ape.nexitool.tools.json.ParsedVertexAttributes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -37,7 +37,7 @@ public class Sizer {
       ArrayNode meshes = (ArrayNode) node.get("meshes");
       for (int k = 0; k < meshes.size(); k++) {
         JsonNode mesh = meshes.get(k);
-        VertexAttributes attributes = new VertexAttributes(mesh);
+        ParsedVertexAttributes attributes = new ParsedVertexAttributes(mesh);
         if (attributes.position >= 0) {
           ArrayNode vertices = (ArrayNode) mesh.get("vertices");
           for (int v = 0; v + attributes.stride - 1 < vertices.size(); v += attributes.stride) {
@@ -61,7 +61,7 @@ public class Sizer {
       ArrayNode meshes = (ArrayNode) node.get("meshes");
       for (int k = 0; k < meshes.size(); k++) {
         JsonNode mesh = meshes.get(k);
-        VertexAttributes attributes = new VertexAttributes(mesh);
+        ParsedVertexAttributes attributes = new ParsedVertexAttributes(mesh);
         if (attributes.position >= 0) {
           ArrayNode vertices = (ArrayNode) mesh.get("vertices");
           for (int v = 0; v + attributes.stride - 1 < vertices.size(); v += attributes.stride) {

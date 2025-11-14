@@ -12,8 +12,6 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FlushablePool;
 
-import java.util.Iterator;
-
 public class BBox {  // See helper below
   /**
    * Computes the exact world-space bounding box by mirroring GPU skinning.

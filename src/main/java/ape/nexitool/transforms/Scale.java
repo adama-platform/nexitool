@@ -1,16 +1,25 @@
-package ape.nexitool.tools;
+package ape.nexitool.transforms;
 
-import ape.nexitool.tools.json.VertexAttributes;
+import ape.nexitool.contracts.Transform;
+import ape.nexitool.tools.json.ParsedVertexAttributes;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+public class Scale implements Transform {
+  private float scale;
 
-public class Scale {
+  public Scale(float scale) {
+    this.scale = scale;
+  }
+
+  @Override
+  public void execute(ObjectNode root) {
+    scaleMeshes(root, scale);
+    scaleNodes(root.get("nodes"), scale);
+    scaleAnimations(root, scale);
+  }
+
   private static void scaleVector(JsonNode vec, double scale) {
     if (vec instanceof ArrayNode v) {
       for (int i = 0; i < v.size(); i++) {
@@ -70,7 +79,7 @@ public class Scale {
           int offset = 0;
           for (int i = 0; i < attrs.size(); i++) {
             String attr = attrs.get(i).asText();
-            int count = VertexAttributes.getComponentCount(attr);
+            int count = ParsedVertexAttributes.getComponentCount(attr);
             if ("POSITION".equals(attr)) {
               posOffset = offset;
             }
@@ -113,19 +122,4 @@ public class Scale {
       }
     }
   }
-
-  public static void processPostLoad(JsonNode root, String outputPath, double scale) throws IOException {
-    scaleMeshes(root, scale);
-    scaleNodes(root.get("nodes"), scale);
-    scaleAnimations(root, scale);
-    Files.writeString(Paths.get(outputPath), root.toPrettyString());
-    System.out.println("Finished: resizing by " + scale);
-  }
-
-  public static void process(String inputPath, String outputPath, double scale) throws IOException {
-    ObjectMapper mapper = new ObjectMapper();
-    JsonNode root = mapper.readTree(new File(inputPath));
-    processPostLoad(root, outputPath, scale);
-  }
 }
-

@@ -1,5 +1,6 @@
 package ape.nexitool.tools;
 
+import ape.nexitool.tools.defunct.Scale;
 import ape.nexitool.tools.json.IsStaticMesh;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;

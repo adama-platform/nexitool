@@ -1,6 +1,6 @@
 package ape.nexitool.tools;
 
-import ape.nexitool.tools.json.VertexAttributes;
+import ape.nexitool.tools.json.ParsedVertexAttributes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -90,7 +90,7 @@ public class Center {
   public static TreeMap<Integer, Vertex> extractVertices(JsonNode mesh) {
     TreeMap<Integer, Vertex> map = new TreeMap<Integer, Vertex>();
     int id = 0;
-    VertexAttributes attributes = new VertexAttributes(mesh);
+    ParsedVertexAttributes attributes = new ParsedVertexAttributes(mesh);
     if (attributes.position >= 0) {
       ArrayNode vertices = (ArrayNode) mesh.get("vertices");
       for (int v = 0; v + attributes.stride - 1 < vertices.size(); v += attributes.stride) {

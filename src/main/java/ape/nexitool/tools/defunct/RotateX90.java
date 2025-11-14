@@ -1,15 +1,19 @@
-package ape.nexitool.tools;
+package ape.nexitool.tools.defunct;
 
+import ape.nexitool.transforms.Rotate;
+import com.badlogic.gdx.math.Matrix3;
+import com.badlogic.gdx.math.Vector3;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class RotateZ90 {
+public class RotateX90 {
   private static int getComponentCount(String attr) {
     if (attr.equals("POSITION") || attr.equals("NORMAL") || attr.equals("TANGENT") || attr.equals("BINORMAL")) {
       return 3;
@@ -26,13 +30,12 @@ public class RotateZ90 {
     }
   }
 
-  private static void rotateZ90(ArrayNode v, int offset) {
+  private static void rotateX90(ArrayNode v, int offset) {
     double x = v.get(offset + 0).asDouble();
     double y = v.get(offset + 1).asDouble();
     double z = v.get(offset + 2).asDouble();
-    v.set(offset + 0, -y);
-    v.set(offset + 1, x);
-    // v.set(offset + 2, z);
+    v.set(offset + 1, -z);
+    v.set(offset + 2, y);
   }
 
   private static void flipMeshes(JsonNode root) {
@@ -69,16 +72,16 @@ public class RotateZ90 {
           }
           for (int i = 0; i < verts.size(); i += stride) {
             if (posOffset >= 0) {
-              rotateZ90(verts, i + posOffset);
+              rotateX90(verts, i + posOffset);
             }
             if (normalOffset >= 0) {
-              rotateZ90(verts, i + normalOffset);
+              rotateX90(verts, i + normalOffset);
             }
             if (tangentOffset >= 0) {
-              rotateZ90(verts, i + tangentOffset);
+              rotateX90(verts, i + tangentOffset);
             }
             if (binormalOffset >= 0) {
-              rotateZ90(verts, i + binormalOffset);
+              rotateX90(verts, i + binormalOffset);
             }
           }
         }
@@ -88,9 +91,12 @@ public class RotateZ90 {
 
 
   public static void processPostLoad(JsonNode root, String outputPath) throws IOException {
-    flipMeshes(root);
+    //flipMeshes(root);
+    Matrix3 mat = new Matrix3();
+    mat.setToRotation(new Vector3(1, 0, 0), 90);
+    new Rotate(mat).execute((ObjectNode) root);
     Files.writeString(Paths.get(outputPath), root.toPrettyString());
-    System.out.println("Finished: rotating 90 degrees around z-axis");
+    System.out.println("Finished: rotating 90 degrees around x-axis");
   }
 
   public static void process(String inputPath, String outputPath) throws IOException {

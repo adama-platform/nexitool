@@ -1,8 +1,12 @@
-package ape.nexitool.tools;
+package ape.nexitool.tools.defunct;
 
+import ape.nexitool.transforms.Rotate;
+import com.badlogic.gdx.math.Matrix3;
+import com.badlogic.gdx.math.Vector3;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.File;
 import java.io.IOException;
@@ -156,9 +160,14 @@ public class RotateY180 {
   }
 
   public static void processPostLoad(JsonNode root, String outputPath) throws IOException {
+    Matrix3 mat = new Matrix3();
+    mat.setToRotation(new Vector3(0, 1, 0), 180);
+    new Rotate(mat).execute((ObjectNode) root);
+    /*
     flipMeshes(root);
     flipNodes(root.get("nodes"));
     flipAnimations(root);
+    */
     Files.writeString(Paths.get(outputPath), root.toPrettyString());
     System.out.println("Finished: rotating 180 degrees around y-axis");
   }

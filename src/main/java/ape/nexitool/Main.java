@@ -2,7 +2,11 @@ package ape.nexitool;
 
 import ape.nexitool.tools.*;
 import ape.nexitool.tools.Sizer;
+import ape.nexitool.tools.defunct.*;
 import ape.nexitool.viewer.Tool;
+import com.badlogic.gdx.backends.headless.HeadlessApplication;
+import com.badlogic.gdx.backends.headless.HeadlessApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
@@ -21,6 +25,8 @@ public class Main {
     System.out.println("nexitool norm-animations input.g3dj output.g3dj");
   }
   public static void main(String[] args) throws Exception {
+    HeadlessApplicationConfiguration config = new HeadlessApplicationConfiguration();
+
     if (args.length == 0) {
       help();
       return;

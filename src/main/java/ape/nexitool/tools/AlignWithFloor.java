@@ -1,6 +1,6 @@
 package ape.nexitool.tools;
 
-import ape.nexitool.tools.json.VertexAttributes;
+import ape.nexitool.tools.json.ParsedVertexAttributes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -37,7 +37,7 @@ public class AlignWithFloor {
           int offset = 0;
           for (int i = 0; i < attrs.size(); i++) {
             String attr = attrs.get(i).asText();
-            int count = VertexAttributes.getComponentCount(attr);
+            int count = ParsedVertexAttributes.getComponentCount(attr);
             if ("POSITION".equals(attr)) {
               posOffset = offset;
             }
@@ -69,7 +69,7 @@ public class AlignWithFloor {
           int offset = 0;
           for (int i = 0; i < attrs.size(); i++) {
             String attr = attrs.get(i).asText();
-            int count = VertexAttributes.getComponentCount(attr);
+            int count = ParsedVertexAttributes.getComponentCount(attr);
             if ("POSITION".equals(attr)) {
               posOffset = offset;
             }
